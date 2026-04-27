@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布代课 - 浙传校园交易广场</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header small-header">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container narrow">
+    <section class="form-card">
+        <p class="eyebrow">Publish Substitute</p>
+        <h1>发布代课需求</h1>
+        <p class="muted">填写课程、时间地点和价格后，会展示在校园代课互助页。</p>
+
+        <form class="publish-form" th:action="@{/substitutes}" th:object="${substitutePost}" method="post">
+            <label>
+                课程名称
+                <input type="text" th:field="*{courseName}" placeholder="例如：媒介经营与管理">
+                <span class="field-error" th:if="${#fields.hasErrors('courseName')}" th:errors="*{courseName}">错误</span>
+            </label>
+
+            <div class="form-row">
+                <label>
+                    代课时间
+                    <input type="text" th:field="*{classTime}" placeholder="例如：周三 08:30-10:00">
+                    <span class="field-error" th:if="${#fields.hasErrors('classTime')}" th:errors="*{classTime}">错误</span>
+                </label>
+                <label>
+                    代课价格
+                    <input type="number" min="0.01" step="0.01" th:field="*{price}" placeholder="例如：35">
+                    <span class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">错误</span>
+                </label>
+            </div>
+
+            <label>
+                代课地点
+                <input type="text" th:field="*{location}" placeholder="例如：钱塘校区教学楼 B204">
+                <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">错误</span>
+            </label>
+
+            <label>
+                发布人
+                <input type="text" th:field="*{publisherName}" placeholder="例如：刘同学">
+                <span class="field-error" th:if="${#fields.hasErrors('publisherName')}" th:errors="*{publisherName}">错误</span>
+            </label>
+
+            <label>
+                补充说明
+                <textarea rows="5" th:field="*{description}" placeholder="例如：老师会点名，需要帮忙记录课堂作业"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">错误</span>
+            </label>
+
+            <div class="actions">
+                <a class="button button-light" th:href="@{/substitutes}">取消</a>
+                <button class="button button-primary" type="submit">确认发布</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

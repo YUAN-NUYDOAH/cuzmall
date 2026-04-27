@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代课互助 - 浙传校园交易广场</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header small-header">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="panel">
+        <div class="section-title">
+            <div>
+                <p class="eyebrow">Substitute</p>
+                <h1>代课互助</h1>
+            </div>
+            <p>发布课程、时间、地点和价格，找到合适的同学后可在详情页实时沟通。</p>
+        </div>
+
+        <form class="search-form compact" th:action="@{/substitutes}" method="get">
+            <input type="search" name="keyword" placeholder="搜索课程、时间、地点..." th:value="${keyword}">
+            <button class="button button-primary" type="submit">搜索</button>
+            <a class="button button-light" th:href="@{/substitutes/publish}">发布代课</a>
+        </form>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(substitutePosts)}">
+            <h3>暂时没有匹配的代课信息</h3>
+            <p>可以换个关键词，或者发布第一条代课需求。</p>
+            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
+        </div>
+
+        <div class="product-grid" th:if="${!#lists.isEmpty(substitutePosts)}">
+            <article class="product-card substitute-card" th:each="post : ${substitutePosts}">
+                <div class="card-topline">
+                    <span class="tag">代课</span>
+                    <span class="status" th:text="${#temporals.format(post.createdAt, 'MM-dd HH:mm')}">04-27 09:00</span>
+                </div>
+                <h3 th:text="${post.courseName}">课程名称</h3>
+                <p th:text="${post.description ?: '发布人暂未填写补充说明。'}">补充说明</p>
+                <div class="price" th:text="|￥${post.price}|">￥35</div>
+                <div class="meta stacked">
+                    <span th:text="${post.classTime}">周三 08:30-10:00</span>
+                    <span th:text="${post.location}">钱塘校区教学楼 B204</span>
+                </div>
+                <a class="button button-light" th:href="@{/substitutes/{id}(id=${post.id})}">查看并聊天</a>
+            </article>
+        </div>
+    </section>
+</main>
+</body>
+</html>

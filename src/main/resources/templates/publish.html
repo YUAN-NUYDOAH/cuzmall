@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布商品 - 浙传校园交易广场</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header small-header">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/publish}">发布商品</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container narrow">
+    <section class="form-card">
+        <p class="eyebrow">Publish</p>
+        <h1>发布校园闲置</h1>
+        <p class="muted">填写商品信息后会立即展示在浙江传媒学院校园交易广场。</p>
+
+        <form class="publish-form" th:action="@{/products}" th:object="${product}" method="post">
+            <label>
+                商品名称
+                <input type="text" th:field="*{title}" placeholder="例如：九成新 iPad Air 5">
+                <span class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">错误</span>
+            </label>
+
+            <label>
+                商品分类
+                <select th:field="*{category}">
+                    <option value="">请选择分类</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.name()}"
+                            th:text="${category.displayName}">数码设备</option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">错误</span>
+            </label>
+
+            <label>
+                价格
+                <input type="number" min="0.01" step="0.01" th:field="*{price}" placeholder="例如：68">
+                <span class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">错误</span>
+            </label>
+
+            <label>
+                交易地点
+                <input type="text" th:field="*{location}" placeholder="例如：钱塘校区图书馆一楼">
+                <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">错误</span>
+            </label>
+
+            <label>
+                商品描述
+                <textarea rows="5" th:field="*{description}" placeholder="写清楚成色、配件、购买时间等信息"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">错误</span>
+            </label>
+
+            <div class="form-row">
+                <label>
+                    卖家姓名
+                    <input type="text" th:field="*{sellerName}" placeholder="例如：陈同学">
+                    <span class="field-error" th:if="${#fields.hasErrors('sellerName')}" th:errors="*{sellerName}">错误</span>
+                </label>
+                <label>
+                    联系方式
+                    <input type="text" th:field="*{contact}" placeholder="微信 / QQ / 手机号">
+                    <span class="field-error" th:if="${#fields.hasErrors('contact')}" th:errors="*{contact}">错误</span>
+                </label>
+            </div>
+
+            <div class="actions">
+                <a class="button button-light" th:href="@{/}">取消</a>
+                <button class="button button-primary" type="submit">确认发布</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

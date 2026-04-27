@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浙传校园交易广场</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/publish}">发布商品</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <p class="eyebrow">浙江传媒学院校园交易网站</p>
+        <h1>让闲置在校园里重新流动</h1>
+        <p>面向浙传同学的二手交易平台，支持教材、数码、生活用品、拍摄器材等校园常用物品发布与浏览。</p>
+        <div class="hero-actions">
+            <a class="button button-primary" th:href="@{/publish}">我要发布</a>
+            <a class="button button-light" href="#products">浏览商品</a>
+            <a class="button button-light" th:href="@{/substitutes}">代课互助</a>
+        </div>
+    </section>
+</header>
+
+<main class="container">
+    <section class="stats-grid">
+        <article>
+            <strong th:text="${#lists.size(products)}">0</strong>
+            <span>当前展示商品</span>
+        </article>
+        <article>
+            <strong>6</strong>
+            <span>校园分类</span>
+        </article>
+        <article>
+            <strong th:text="${#lists.size(latestSubstitutePosts)}">0</strong>
+            <span>最新代课信息</span>
+        </article>
+    </section>
+
+    <section class="panel substitute-preview">
+        <div class="section-title">
+            <div>
+                <p class="eyebrow">Substitute</p>
+                <h2>代课互助</h2>
+            </div>
+            <p>发布代课时间、地点、课程和价格，在平台内实时聊天确认细节。</p>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(latestSubstitutePosts)}">
+            <h3>暂时没有代课信息</h3>
+            <p>发布第一条代课需求，找到合适的同学来沟通。</p>
+            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
+        </div>
+
+        <div class="product-grid" th:if="${!#lists.isEmpty(latestSubstitutePosts)}">
+            <article class="product-card substitute-card" th:each="post : ${latestSubstitutePosts}">
+                <div class="card-topline">
+                    <span class="tag">代课</span>
+                    <span class="status" th:text="${#temporals.format(post.createdAt, 'MM-dd HH:mm')}">04-27 09:00</span>
+                </div>
+                <h3 th:text="${post.courseName}">媒介经营与管理</h3>
+                <p th:text="${post.description ?: '发布人暂未填写补充说明。'}">老师会点名，需要能按时到教室。</p>
+                <div class="price" th:text="|￥${post.price}|">￥35</div>
+                <div class="meta stacked">
+                    <span th:text="${post.classTime}">周三 08:30-10:00</span>
+                    <span th:text="${post.location}">钱塘校区教学楼 B204</span>
+                </div>
+                <a class="button button-light" th:href="@{/substitutes/{id}(id=${post.id})}">查看并聊天</a>
+            </article>
+        </div>
+
+        <div class="actions">
+            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
+            <a class="button button-light" th:href="@{/substitutes}">查看更多</a>
+        </div>
+    </section>
+
+    <section class="panel" id="products">
+        <div class="section-title">
+            <div>
+                <p class="eyebrow">Marketplace</p>
+                <h2>交易广场</h2>
+            </div>
+            <p>搜索地点、商品名或描述，快速找到需要的校园闲置。</p>
+        </div>
+
+        <form class="search-form" th:action="@{/}" method="get">
+            <input type="search" name="keyword" placeholder="搜索 iPad、教材、三脚架..." th:value="${keyword}">
+            <select name="category">
+                <option value="">全部分类</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.name()}"
+                        th:selected="${category == selectedCategory}"
+                        th:text="${category.displayName}">数码设备</option>
+            </select>
+            <button class="button button-primary" type="submit">筛选</button>
+        </form>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+            <h3>暂时没有匹配商品</h3>
+            <p>换个关键词试试，或者发布第一件校园闲置。</p>
+            <a class="button button-primary" th:href="@{/publish}">发布商品</a>
+        </div>
+
+        <div class="product-grid" th:if="${!#lists.isEmpty(products)}">
+            <article class="product-card" th:each="product : ${products}">
+                <div class="card-topline">
+                    <span class="tag" th:text="${product.category.displayName}">数码设备</span>
+                    <span class="status" th:text="${product.status.displayName}">在售</span>
+                </div>
+                <h3 th:text="${product.title}">九成新 iPad Air 5</h3>
+                <p th:text="${product.description}">商品描述</p>
+                <div class="price" th:text="|￥${product.price}|">￥2899</div>
+                <div class="meta">
+                    <span th:text="${product.location}">桐乡校区</span>
+                    <span th:text="${#temporals.format(product.createdAt, 'MM-dd HH:mm')}">04-27 09:00</span>
+                </div>
+                <a class="button button-light" th:href="@{/products/{id}(id=${product.id})}">查看详情</a>
+            </article>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.title} + ' - 浙传校园交易广场'">商品详情</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header small-header">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/publish}">发布商品</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container narrow">
+    <div class="notice" th:if="${message}" th:text="${message}">发布成功</div>
+
+    <article class="detail-card">
+        <div class="card-topline">
+            <span class="tag" th:text="${product.category.displayName}">数码设备</span>
+            <span class="status" th:text="${product.status.displayName}">在售</span>
+        </div>
+
+        <h1 th:text="${product.title}">商品标题</h1>
+        <div class="price large" th:text="|￥${product.price}|">￥100</div>
+        <p class="description" th:text="${product.description}">商品描述</p>
+
+        <dl class="detail-list">
+            <div>
+                <dt>交易地点</dt>
+                <dd th:text="${product.location}">浙江传媒学院</dd>
+            </div>
+            <div>
+                <dt>卖家</dt>
+                <dd th:text="${product.sellerName}">同学</dd>
+            </div>
+            <div>
+                <dt>联系方式</dt>
+                <dd th:text="${product.contact}">微信</dd>
+            </div>
+            <div>
+                <dt>发布时间</dt>
+                <dd th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">2026-04-27 09:00</dd>
+            </div>
+        </dl>
+
+        <div class="safe-tip">
+            <strong>交易提醒：</strong>建议优先选择校内公共区域面交，确认商品状态后再付款。
+        </div>
+
+        <div class="actions">
+            <a class="button button-light" th:href="@{/}">返回交易广场</a>
+            <a class="button button-primary" th:href="@{/publish}">继续发布</a>
+        </div>
+    </article>
+</main>
+</body>
+</html>

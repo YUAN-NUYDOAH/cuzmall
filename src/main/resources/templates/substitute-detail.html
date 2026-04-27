@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${substitutePost.courseName} + ' - 代课互助'">代课详情</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header small-header">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container narrow">
+    <div class="notice" th:if="${message}" th:text="${message}">发布成功</div>
+
+    <article class="detail-card substitute-detail">
+        <div class="card-topline">
+            <span class="tag">代课需求</span>
+            <span class="status" th:text="${#temporals.format(substitutePost.createdAt, 'MM-dd HH:mm')}">04-27 09:00</span>
+        </div>
+
+        <h1 th:text="${substitutePost.courseName}">课程名称</h1>
+        <div class="price large" th:text="|￥${substitutePost.price}|">￥35</div>
+        <p class="description" th:text="${substitutePost.description ?: '发布人暂未填写补充说明。'}">补充说明</p>
+
+        <dl class="detail-list">
+            <div>
+                <dt>代课时间</dt>
+                <dd th:text="${substitutePost.classTime}">周三 08:30-10:00</dd>
+            </div>
+            <div>
+                <dt>代课地点</dt>
+                <dd th:text="${substitutePost.location}">钱塘校区教学楼 B204</dd>
+            </div>
+            <div>
+                <dt>发布人</dt>
+                <dd th:text="${substitutePost.publisherName}">刘同学</dd>
+            </div>
+            <div>
+                <dt>发布时间</dt>
+                <dd th:text="${#temporals.format(substitutePost.createdAt, 'yyyy-MM-dd HH:mm')}">2026-04-27 09:00</dd>
+            </div>
+        </dl>
+
+        <div class="safe-tip">
+            <strong>提醒：</strong>请在平台聊天中先确认课程要求、点名方式和费用，避免提前转账。
+        </div>
+
+        <section class="chat-panel" id="chat" th:data-post-id="${substitutePost.id}">
+            <div class="section-title compact-title">
+                <div>
+                    <p class="eyebrow">Live Chat</p>
+                    <h2>实时聊天</h2>
+                </div>
+                <p id="chatStatus">正在连接...</p>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-chat" th:if="${#lists.isEmpty(messages)}">还没有消息，发起第一句沟通吧。</div>
+                <article class="chat-message" th:each="message : ${messages}">
+                    <div class="chat-meta">
+                        <strong th:text="${message.senderName}">王同学</strong>
+                        <span th:text="${#temporals.format(message.createdAt, 'MM-dd HH:mm')}">04-27 09:00</span>
+                    </div>
+                    <p th:text="${message.content}">消息内容</p>
+                </article>
+            </div>
+
+            <form class="chat-form" id="chatForm">
+                <input type="text" id="senderName" maxlength="30" placeholder="你的昵称，例如：王同学" autocomplete="name">
+                <div class="chat-input-row">
+                    <input type="text" id="messageContent" maxlength="300" placeholder="输入消息，和对方确认课程要求">
+                    <button class="button button-primary" type="submit">发送</button>
+                </div>
+                <p class="field-error" id="chatError" hidden></p>
+            </form>
+        </section>
+
+        <div class="actions">
+            <a class="button button-light" th:href="@{/substitutes}">返回代课互助</a>
+            <a class="button button-primary" th:href="@{/substitutes/publish}">继续发布</a>
+        </div>
+    </article>
+</main>
+
+<script>
+    const chatPanel = document.getElementById('chat');
+    const postId = chatPanel.dataset.postId;
+    const statusEl = document.getElementById('chatStatus');
+    const messagesEl = document.getElementById('chatMessages');
+    const formEl = document.getElementById('chatForm');
+    const senderEl = document.getElementById('senderName');
+    const contentEl = document.getElementById('messageContent');
+    const errorEl = document.getElementById('chatError');
+    const storageKey = `substitute-chat-name-${postId}`;
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${wsProtocol}//${window.location.host}/ws/substitutes/${postId}`);
+
+    senderEl.value = localStorage.getItem(storageKey) || '';
+
+    socket.addEventListener('open', () => {
+        statusEl.textContent = '已连接，消息会实时送达';
+        statusEl.classList.remove('offline');
+    });
+
+    socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
+        appendMessage(message);
+    });
+
+    socket.addEventListener('close', () => {
+        statusEl.textContent = '连接已断开，可刷新页面重连';
+        statusEl.classList.add('offline');
+    });
+
+    formEl.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const senderName = senderEl.value.trim();
+        const content = contentEl.value.trim();
+        hideError();
+
+        if (!senderName || !content) {
+            showError('昵称和消息内容都不能为空。');
+            return;
+        }
+        if (socket.readyState !== WebSocket.OPEN) {
+            showError('聊天连接未就绪，请稍后再试或刷新页面。');
+            return;
+        }
+
+        localStorage.setItem(storageKey, senderName);
+        socket.send(JSON.stringify({ senderName, content }));
+        contentEl.value = '';
+    });
+
+    function appendMessage(message) {
+        const emptyChat = messagesEl.querySelector('.empty-chat');
+        if (emptyChat) {
+            emptyChat.remove();
+        }
+
+        const article = document.createElement('article');
+        article.className = message.system ? 'chat-message system-message' : 'chat-message';
+        article.innerHTML = `
+            <div class="chat-meta">
+                <strong></strong>
+                <span></span>
+            </div>
+            <p></p>
+        `;
+        article.querySelector('strong').textContent = message.senderName;
+        article.querySelector('span').textContent = message.createdAt;
+        article.querySelector('p').textContent = message.content;
+        messagesEl.appendChild(article);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function showError(message) {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+    }
+
+    function hideError() {
+        errorEl.textContent = '';
+        errorEl.hidden = true;
+    }
+</script>
+</body>
+</html>
