@@ -1,6 +1,7 @@
 package cn.zjicm.transaction.websocket;
 
 import cn.zjicm.transaction.model.ChatMessage;
+import cn.zjicm.transaction.repository.ChatMessageRepository;
 import cn.zjicm.transaction.repository.SubstitutePostRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,11 +28,15 @@ public class SubstituteChatWebSocketHandler extends TextWebSocketHandler {
     private static final UriTemplate CHAT_URI_TEMPLATE = new UriTemplate("/ws/substitutes/{id}");
 
     private final SubstitutePostRepository substitutePostRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ObjectMapper objectMapper;
     private final Map<Long, Set<WebSocketSession>> sessionsByPostId = new ConcurrentHashMap<>();
 
-    public SubstituteChatWebSocketHandler(SubstitutePostRepository substitutePostRepository, ObjectMapper objectMapper) {
+    public SubstituteChatWebSocketHandler(SubstitutePostRepository substitutePostRepository,
+                                          ChatMessageRepository chatMessageRepository,
+                                          ObjectMapper objectMapper) {
         this.substitutePostRepository = substitutePostRepository;
+        this.chatMessageRepository = chatMessageRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -54,11 +59,7 @@ public class SubstituteChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        ChatMessage savedMessage = substitutePostRepository.addMessage(
-                postId,
-                incomingMessage.senderName(),
-                incomingMessage.content()
-        );
+        ChatMessage savedMessage = saveMessage(postId, incomingMessage.senderName(), incomingMessage.content());
         broadcast(postId, OutgoingMessage.from(savedMessage));
     }
 
@@ -70,6 +71,14 @@ public class SubstituteChatWebSocketHandler extends TextWebSocketHandler {
         if (sessions.isEmpty()) {
             sessionsByPostId.remove(postId);
         }
+    }
+
+    private ChatMessage saveMessage(Long postId, String senderName, String content) {
+        ChatMessage message = new ChatMessage();
+        message.setSubstitutePostId(postId);
+        message.setSenderName(senderName.trim());
+        message.setContent(content.trim());
+        return chatMessageRepository.save(message);
     }
 
     private IncomingMessage readIncomingMessage(String payload) {

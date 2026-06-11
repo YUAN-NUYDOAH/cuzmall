@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 浙传校园交易广场</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-nav :: header(true)}"></header>
+
+<main class="container narrow">
+    <section class="form-card">
+        <p class="eyebrow">Account</p>
+        <h1>注册账号</h1>
+        <p class="muted">注册后即可发布校园闲置和代课信息。</p>
+
+        <form class="publish-form" th:action="@{/register}" th:object="${registerForm}" method="post">
+            <label>
+                用户名
+                <input type="text" th:field="*{username}" placeholder="例如：zjicm2024" autocomplete="username">
+                <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">错误</span>
+            </label>
+            <label>
+                密码
+                <input type="password" th:field="*{password}" placeholder="至少 6 个字符" autocomplete="new-password">
+                <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">错误</span>
+            </label>
+            <label>
+                显示名称
+                <input type="text" th:field="*{displayName}" placeholder="例如：陈同学">
+                <span class="field-error" th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}">错误</span>
+            </label>
+            <div class="actions">
+                <a class="button button-light" th:href="@{/login}">返回登录</a>
+                <button class="button button-primary" type="submit">注册</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

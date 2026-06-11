@@ -7,19 +7,11 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<header class="site-header small-header">
-    <nav class="nav">
-        <a class="brand" th:href="@{/}">ZJICM Market</a>
-        <div class="nav-links">
-            <a th:href="@{/}">交易广场</a>
-            <a th:href="@{/substitutes}">代课互助</a>
-            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
-        </div>
-    </nav>
-</header>
+<header th:replace="~{fragments/site-nav :: header(true)}"></header>
 
 <main class="container narrow">
     <div class="notice" th:if="${message}" th:text="${message}">发布成功</div>
+    <div class="notice error-notice" th:if="${paymentError}" th:text="${paymentError}">支付提示</div>
 
     <article class="detail-card substitute-detail">
         <div class="card-topline">
@@ -53,6 +45,18 @@
         <div class="safe-tip">
             <strong>提醒：</strong>请在平台聊天中先确认课程要求、点名方式和费用，避免提前转账。
         </div>
+
+        <section class="payment-panel">
+            <div>
+                <p class="eyebrow">Wechat Pay</p>
+                <h2>微信扫码支付</h2>
+                <p class="muted" th:if="${wechatPayConfigured}">生成微信支付二维码后，用微信扫码完成代课费用支付。</p>
+                <p class="muted" th:if="${!wechatPayConfigured}">微信支付商户参数尚未配置，配置环境变量后即可启用真实支付。</p>
+            </div>
+            <form th:action="@{/substitutes/{id}/payments/wechat(id=${substitutePost.id})}" method="post">
+                <button class="button button-primary" type="submit" th:disabled="${!wechatPayConfigured}">微信支付</button>
+            </form>
+        </section>
 
         <section class="chat-panel" id="chat" th:data-post-id="${substitutePost.id}">
             <div class="section-title compact-title">

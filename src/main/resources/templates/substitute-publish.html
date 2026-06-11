@@ -7,16 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<header class="site-header small-header">
-    <nav class="nav">
-        <a class="brand" th:href="@{/}">ZJICM Market</a>
-        <div class="nav-links">
-            <a th:href="@{/}">交易广场</a>
-            <a th:href="@{/substitutes}">代课互助</a>
-            <a class="button button-primary" th:href="@{/substitutes/publish}">发布代课</a>
-        </div>
-    </nav>
-</header>
+<header th:replace="~{fragments/site-nav :: header(true)}"></header>
 
 <main class="container narrow">
     <section class="form-card">

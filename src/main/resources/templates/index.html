@@ -7,27 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<header class="site-header">
-    <nav class="nav">
-        <a class="brand" th:href="@{/}">ZJICM Market</a>
-        <div class="nav-links">
-            <a th:href="@{/}">交易广场</a>
-            <a th:href="@{/substitutes}">代课互助</a>
-            <a class="button button-primary" th:href="@{/publish}">发布商品</a>
-        </div>
-    </nav>
-
-    <section class="hero">
-        <p class="eyebrow">浙江传媒学院校园交易网站</p>
-        <h1>让闲置在校园里重新流动</h1>
-        <p>面向浙传同学的二手交易平台，支持教材、数码、生活用品、拍摄器材等校园常用物品发布与浏览。</p>
-        <div class="hero-actions">
-            <a class="button button-primary" th:href="@{/publish}">我要发布</a>
-            <a class="button button-light" href="#products">浏览商品</a>
-            <a class="button button-light" th:href="@{/substitutes}">代课互助</a>
-        </div>
-    </section>
-</header>
+<header th:replace="~{fragments/site-nav :: header(false)}"></header>
 
 <main class="container">
     <section class="stats-grid">
@@ -112,6 +92,9 @@
 
         <div class="product-grid" th:if="${!#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
+                <div class="product-thumb-wrap" th:if="${product.imagePath}">
+                    <img class="product-thumb" th:src="${product.imagePath}" th:alt="${product.title}">
+                </div>
                 <div class="card-topline">
                     <span class="tag" th:text="${product.category.displayName}">数码设备</span>
                     <span class="status" th:text="${product.status.displayName}">在售</span>

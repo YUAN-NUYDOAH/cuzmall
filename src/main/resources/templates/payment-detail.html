@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信扫码支付 - 浙传校园交易广场</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-nav :: header(true)}"></header>
+
+<main class="container narrow">
+    <article class="detail-card payment-detail" th:data-order-no="${paymentOrder.orderNo}">
+        <p class="eyebrow">Wechat Native Pay</p>
+        <h1>微信扫码支付</h1>
+        <p class="muted">请使用微信扫描二维码完成支付，支付成功后页面会自动刷新状态。</p>
+
+        <dl class="detail-list">
+            <div>
+                <dt>订单号</dt>
+                <dd th:text="${paymentOrder.orderNo}">CUZ202604271000001</dd>
+            </div>
+            <div>
+                <dt>支付类型</dt>
+                <dd th:text="${paymentOrder.targetType.displayName}">二手商品</dd>
+            </div>
+            <div>
+                <dt>支付项目</dt>
+                <dd th:text="${paymentOrder.targetTitle}">商品标题</dd>
+            </div>
+            <div>
+                <dt>订单状态</dt>
+                <dd id="paymentStatus" th:text="${paymentOrder.status.displayName}">待支付</dd>
+            </div>
+        </dl>
+
+        <div class="price large" th:text="|￥${paymentOrder.amount}|">￥100</div>
+
+        <div class="qr-card" th:if="${paymentOrder.codeUrl}">
+            <img th:src="@{/payments/{orderNo}/qr(orderNo=${paymentOrder.orderNo})}" alt="微信支付二维码">
+            <p>二维码有效期以微信支付规则为准，如支付失败请返回详情页重新发起。</p>
+        </div>
+
+        <div class="notice error-notice" th:if="${!paymentOrder.codeUrl}">
+            当前订单没有可用二维码，请返回详情页重新发起支付。
+        </div>
+
+        <div class="actions">
+            <a class="button button-light" th:href="${paymentOrder.returnUrl}">返回详情</a>
+            <a class="button button-primary" th:href="@{/}">回到首页</a>
+        </div>
+    </article>
+</main>
+
+<script>
+    const paymentDetail = document.querySelector('.payment-detail');
+    const orderNo = paymentDetail.dataset.orderNo;
+    const statusEl = document.getElementById('paymentStatus');
+
+    async function refreshPaymentStatus() {
+        const response = await fetch(`/payments/${orderNo}/status`);
+        if (!response.ok) {
+            return;
+        }
+        const data = await response.json();
+        statusEl.textContent = data.displayName;
+        if (data.paid) {
+            statusEl.classList.add('paid-status');
+            clearInterval(statusTimer);
+            setTimeout(() => window.location.reload(), 1200);
+        }
+    }
+
+    const statusTimer = setInterval(refreshPaymentStatus, 3000);
+</script>
+</body>
+</html>

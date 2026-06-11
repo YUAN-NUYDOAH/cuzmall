@@ -7,16 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<header class="site-header small-header">
-    <nav class="nav">
-        <a class="brand" th:href="@{/}">ZJICM Market</a>
-        <div class="nav-links">
-            <a th:href="@{/}">交易广场</a>
-            <a th:href="@{/substitutes}">代课互助</a>
-            <a class="button button-primary" th:href="@{/publish}">发布商品</a>
-        </div>
-    </nav>
-</header>
+<header th:replace="~{fragments/site-nav :: header(true)}"></header>
 
 <main class="container narrow">
     <section class="form-card">
@@ -24,7 +15,7 @@
         <h1>发布校园闲置</h1>
         <p class="muted">填写商品信息后会立即展示在浙江传媒学院校园交易广场。</p>
 
-        <form class="publish-form" th:action="@{/products}" th:object="${product}" method="post">
+        <form class="publish-form" th:action="@{/products}" th:object="${product}" method="post" enctype="multipart/form-data">
             <label>
                 商品名称
                 <input type="text" th:field="*{title}" placeholder="例如：九成新 iPad Air 5">
@@ -52,6 +43,13 @@
                 交易地点
                 <input type="text" th:field="*{location}" placeholder="例如：钱塘校区图书馆一楼">
                 <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">错误</span>
+            </label>
+
+            <label>
+                商品图片
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
+                <span class="field-hint">可选，支持 JPG / PNG / WEBP，最大 5MB</span>
+                <span class="field-error" th:if="${imageUploadError}" th:text="${imageUploadError}">错误</span>
             </label>
 
             <label>

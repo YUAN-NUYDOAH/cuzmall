@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header class="site-header" th:classappend="${smallHeader} ? 'small-header' : ''" th:fragment="header(smallHeader)">
+    <nav class="nav">
+        <a class="brand" th:href="@{/}">ZJICM Market</a>
+        <div class="nav-links">
+            <a th:href="@{/}">交易广场</a>
+            <a th:href="@{/substitutes}">代课互助</a>
+            <a class="button button-primary" th:href="@{/publish}" sec:authorize="isAuthenticated()">发布商品</a>
+            <a class="button button-light nav-auth" th:href="@{/login}" sec:authorize="!isAuthenticated()">登录</a>
+            <a class="button button-primary nav-auth" th:href="@{/register}" sec:authorize="!isAuthenticated()">注册</a>
+            <span class="nav-user" sec:authorize="isAuthenticated()">
+                <span th:text="${currentUser != null ? currentUser.displayName : #authentication.name}">同学</span>
+                <form class="logout-form" th:action="@{/logout}" method="post">
+                    <button class="button-link" type="submit">退出</button>
+                </form>
+            </span>
+        </div>
+    </nav>
+
+    <section class="hero" th:if="${!smallHeader}">
+        <p class="eyebrow">浙江传媒学院校园交易网站</p>
+        <h1>让闲置在校园里重新流动</h1>
+        <p>面向浙传同学的二手交易平台，支持教材、数码、生活用品、拍摄器材等校园常用物品发布与浏览。</p>
+        <div class="hero-actions">
+            <a class="button button-primary" th:href="@{/publish}" sec:authorize="isAuthenticated()">我要发布</a>
+            <a class="button button-light" th:href="@{/login}" sec:authorize="!isAuthenticated()">登录后发布</a>
+            <a class="button button-light" href="#products">浏览商品</a>
+            <a class="button button-light" th:href="@{/substitutes}">代课互助</a>
+        </div>
+    </section>
+</header>
+</body>
+</html>

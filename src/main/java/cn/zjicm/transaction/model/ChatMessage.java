@@ -1,13 +1,32 @@
 package cn.zjicm.transaction.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "chat_messages")
 public class ChatMessage {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private Long substitutePostId;
+
+    @Column(nullable = false, length = 30)
     private String senderName;
+
+    @Column(nullable = false, length = 300)
     private String content;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public ChatMessage() {
@@ -19,6 +38,13 @@ public class ChatMessage {
         this.senderName = senderName;
         this.content = content;
         this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
     }
 
     public Long getId() {
