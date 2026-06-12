@@ -13,6 +13,10 @@ logs/
 .env
 .env.*
 
+# Deploy SSH keys (never commit)
+deploy_key
+deploy_key.pub
+
 # IDE and OS files
 .vscode/
 .idea/

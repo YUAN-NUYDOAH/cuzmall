@@ -1,4 +1,4 @@
-name: Deploy
+name: CI and Deploy
 
 on:
   push:
@@ -15,8 +15,8 @@ env:
   IMAGE_NAME: cuzmall
 
 jobs:
-  deploy:
-    name: Build and deploy Docker image
+  test-and-build:
+    name: Test and build
     runs-on: ubuntu-latest
 
     steps:
@@ -34,6 +34,20 @@ jobs:
         run: mvn -B test
 
       - name: Build Docker image
+        run: docker build -t "${IMAGE_NAME}:${GITHUB_SHA}" .
+
+  deploy:
+    name: Deploy to server
+    needs: test-and-build
+    # 无服务器时推送只跑 test-and-build；有服务器后手动触发或设置 AUTO_DEPLOY=true
+    if: github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
         run: |
           docker build -t "${IMAGE_NAME}:${GITHUB_SHA}" .
           docker save "${IMAGE_NAME}:${GITHUB_SHA}" | gzip > app-image.tar.gz
@@ -44,8 +58,14 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
         run: |
-          test -n "${SSH_PRIVATE_KEY}"
-          test -n "${SERVER_HOST}"
+          if [ -z "${SSH_PRIVATE_KEY}" ]; then
+            echo "::error::未配置 SSH_PRIVATE_KEY。请在仓库 Settings → Secrets and variables → Actions 中添加部署密钥。"
+            exit 1
+          fi
+          if [ -z "${SERVER_HOST}" ]; then
+            echo "::error::未配置 SERVER_HOST。请添加服务器 IP 或域名。"
+            exit 1
+          fi
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           printf '%s\n' "${SSH_PRIVATE_KEY}" > ~/.ssh/deploy_key
@@ -59,7 +79,10 @@ jobs:
           SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/cuzmall' }}
         run: |
-          test -n "${SERVER_USER}"
+          if [ -z "${SERVER_USER}" ]; then
+            echo "::error::未配置 SERVER_USER。请添加 SSH 登录用户名（如 root 或 ubuntu）。"
+            exit 1
+          fi
           ssh -i ~/.ssh/deploy_key -p "${SERVER_PORT}" "${SERVER_USER}@${SERVER_HOST}" "mkdir -p '${DEPLOY_PATH}/uploads'"
           scp -i ~/.ssh/deploy_key -P "${SERVER_PORT}" app-image.tar.gz "${SERVER_USER}@${SERVER_HOST}:${DEPLOY_PATH}/app-image.tar.gz"
 
